@@ -10,5 +10,6 @@ a(action) - c(cmd)
 2. open url to new window: xss.swf?a=open&c=http://www.google.com/
 3. http request to url: xss.swf?a=get&c=http://www.google.com/
 4. eval js codz: xss.swf?a=eval&c=alert(document.domain)
+
 -----------------
 by evilcos@gmail.com
